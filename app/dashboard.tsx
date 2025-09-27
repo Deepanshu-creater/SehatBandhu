@@ -1,4 +1,5 @@
-import { FontAwesome5, Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -7,7 +8,6 @@ import {
   Image,
   Linking,
   Modal,
-  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -16,7 +16,6 @@ import {
   View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import DateTimePicker from '@react-native-community/datetimepicker';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const isMobile = screenWidth < 768;
@@ -348,7 +347,7 @@ function ConsultationBookingModal({
               </TouchableOpacity>
               <TouchableOpacity style={modalStyles.submitBtn} onPress={handleSubmit}>
                 <Ionicons name="videocam" size={18} color={COLORS.white} />
-                <Text style={modalStyles.submitText}>Start Consultation</Text>
+                <Text style={modalStyles.submitText}>Get Reciept</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
