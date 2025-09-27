@@ -1,4 +1,4 @@
-// app/(tabs)/_layout.tsx
+// app/tabs/_layout.tsx
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
