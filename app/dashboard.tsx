@@ -32,9 +32,10 @@ const COLORS = {
   border: '#E5E7EB',
   danger: '#EF4444',
   warning: '#F59E0B',
+  success: '#10B981',
 };
 
-type IoniconsName = 'home' | 'medkit' | 'document-text' | 'search' | 'log-out' | 'calendar' | 'person' | 'videocam' | 'time' | 'medical' | 'alert-circle';
+type IoniconsName = 'home' | 'medkit' | 'document-text' | 'search' | 'log-out' | 'calendar' | 'person' | 'videocam' | 'time' | 'medical' | 'alert-circle' | 'checkmark-circle' | 'download';
 type FontAwesome5Name = 'hospital' | 'user-md';
 type TabType = 'dashboard' | 'prescription' | 'healthRecord' | 'consult';
 
@@ -75,11 +76,287 @@ const MEDICINE_TIMINGS = [
   { id: 'as_needed', label: 'As Needed' },
 ];
 
+// Receipt Modal Component
+interface ReceiptModalProps {
+  visible: boolean;
+  receiptData: ConsultationData | null;
+  onClose: () => void;
+  onDownload: () => void;
+}
+
+function ReceiptModal({ visible, receiptData, onClose, onDownload }: ReceiptModalProps) {
+  if (!receiptData) return null;
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const getConsultationTypeLabel = (type: string) => {
+    return CONSULTATION_TYPES.find(t => t.id === type)?.label || type;
+  };
+
+  const getTimeSlotLabel = (slot: string) => {
+    return TIME_SLOTS.find(s => s.id === slot)?.label || slot;
+  };
+
+  const getMedicineTimingLabel = (timing: string) => {
+    return MEDICINE_TIMINGS.find(m => m.id === timing)?.label || timing;
+  };
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent>
+      <View style={receiptStyles.overlay}>
+        <View style={receiptStyles.container}>
+          <ScrollView contentContainerStyle={receiptStyles.scrollContent}>
+            <View style={receiptStyles.header}>
+              <Text style={receiptStyles.title}>Consultation Receipt</Text>
+              <TouchableOpacity onPress={onClose} style={receiptStyles.closeButton}>
+                <Ionicons name="close" size={24} color={COLORS.textLight} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={receiptStyles.receiptContent}>
+              {/* Receipt Header */}
+              <View style={receiptStyles.receiptHeader}>
+                <Ionicons name="checkmark-circle" size={48} color={COLORS.success} />
+                <Text style={receiptStyles.successTitle}>Booking Confirmed!</Text>
+                <Text style={receiptStyles.successSubtitle}>Your consultation has been scheduled successfully</Text>
+              </View>
+
+              {/* Receipt Details */}
+              <View style={receiptStyles.detailsSection}>
+                <Text style={receiptStyles.sectionTitle}>Consultation Details</Text>
+                
+                <View style={receiptStyles.detailRow}>
+                  <Text style={receiptStyles.detailLabel}>Sehat ID:</Text>
+                  <Text style={receiptStyles.detailValue}>{receiptData.sehatId}</Text>
+                </View>
+                
+                <View style={receiptStyles.detailRow}>
+                  <Text style={receiptStyles.detailLabel}>Consultation Type:</Text>
+                  <Text style={receiptStyles.detailValue}>{getConsultationTypeLabel(receiptData.consultationType)}</Text>
+                </View>
+                
+                <View style={receiptStyles.detailRow}>
+                  <Text style={receiptStyles.detailLabel}>Date:</Text>
+                  <Text style={receiptStyles.detailValue}>{formatDate(receiptData.preferredDate)}</Text>
+                </View>
+                
+                <View style={receiptStyles.detailRow}>
+                  <Text style={receiptStyles.detailLabel}>Time Slot:</Text>
+                  <Text style={receiptStyles.detailValue}>{getTimeSlotLabel(receiptData.preferredSlot)}</Text>
+                </View>
+                
+                <View style={receiptStyles.detailRow}>
+                  <Text style={receiptStyles.detailLabel}>Medicine Timing:</Text>
+                  <Text style={receiptStyles.detailValue}>{getMedicineTimingLabel(receiptData.medicineTiming)}</Text>
+                </View>
+                
+                <View style={receiptStyles.detailRow}>
+                  <Text style={receiptStyles.detailLabel}>Priority:</Text>
+                  <Text style={[receiptStyles.detailValue, receiptStyles.priorityValue]}>
+                    {receiptData.priority.toUpperCase()}
+                  </Text>
+                </View>
+
+                {receiptData.doctorPreference && (
+                  <View style={receiptStyles.detailRow}>
+                    <Text style={receiptStyles.detailLabel}>Doctor Preference:</Text>
+                    <Text style={receiptStyles.detailValue}>{receiptData.doctorPreference}</Text>
+                  </View>
+                )}
+              </View>
+
+              {/* Symptoms Summary */}
+              <View style={receiptStyles.symptomsSection}>
+                <Text style={receiptStyles.sectionTitle}>Symptoms Summary</Text>
+                <Text style={receiptStyles.symptomsText}>{receiptData.symptoms}</Text>
+              </View>
+
+              {/* Booking Info */}
+              <View style={receiptStyles.bookingInfo}>
+                <Text style={receiptStyles.bookingId}>Booking ID: CN-{Date.now().toString().slice(-6)}</Text>
+                <Text style={receiptStyles.bookingDate}>
+                  Booked on: {new Date().toLocaleDateString()} at {new Date().toLocaleTimeString()}
+                </Text>
+              </View>
+            </View>
+
+            {/* Actions */}
+            <View style={receiptStyles.actions}>
+              <TouchableOpacity style={receiptStyles.closeBtn} onPress={onClose}>
+                <Text style={receiptStyles.closeText}>Close</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={receiptStyles.downloadBtn} onPress={onDownload}>
+                <Ionicons name="download" size={18} color={COLORS.white} />
+                <Text style={receiptStyles.downloadText}>Download Receipt</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+const receiptStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+  },
+  container: {
+    width: "100%",
+    maxWidth: 500,
+    maxHeight: "90%",
+    backgroundColor: "white",
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  scrollContent: {
+    padding: 20,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: COLORS.primary,
+    flex: 1,
+  },
+  closeButton: {
+    padding: 4,
+  },
+  receiptContent: {
+    marginBottom: 20,
+  },
+  receiptHeader: {
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: COLORS.primaryLight,
+    borderRadius: 12,
+    marginBottom: 20,
+  },
+  successTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: COLORS.success,
+    marginTop: 8,
+  },
+  successSubtitle: {
+    fontSize: 14,
+    color: COLORS.textLight,
+    textAlign: "center",
+    marginTop: 4,
+  },
+  detailsSection: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: COLORS.primary,
+    marginBottom: 12,
+  },
+  detailRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  detailLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: COLORS.text,
+    flex: 1,
+  },
+  detailValue: {
+    fontSize: 14,
+    color: COLORS.textLight,
+    flex: 1,
+    textAlign: "right",
+  },
+  priorityValue: {
+    fontWeight: "bold",
+    color: COLORS.primary,
+  },
+  symptomsSection: {
+    marginBottom: 20,
+  },
+  symptomsText: {
+    fontSize: 14,
+    color: COLORS.textLight,
+    lineHeight: 20,
+    backgroundColor: COLORS.background,
+    padding: 12,
+    borderRadius: 8,
+  },
+  bookingInfo: {
+    backgroundColor: COLORS.background,
+    padding: 12,
+    borderRadius: 8,
+  },
+  bookingId: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  bookingDate: {
+    fontSize: 12,
+    color: COLORS.textLight,
+  },
+  actions: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  closeBtn: {
+    flex: 1,
+    backgroundColor: COLORS.textLight,
+    padding: 14,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  downloadBtn: {
+    flex: 2,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: COLORS.primary,
+    padding: 14,
+    borderRadius: 8,
+    gap: 8,
+  },
+  closeText: {
+    color: COLORS.white,
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  downloadText: {
+    color: COLORS.white,
+    fontWeight: "600",
+    fontSize: 14,
+  },
+});
+
 // Consultation Booking Modal Component
 interface ConsultationBookingModalProps {
   visible: boolean;
   onClose: () => void;
-  onStartConsultation: (data: ConsultationData) => void;
+  onBookingSuccess: (data: ConsultationData) => void;
 }
 
 interface ConsultationData {
@@ -96,7 +373,7 @@ interface ConsultationData {
 function ConsultationBookingModal({
   visible,
   onClose,
-  onStartConsultation,
+  onBookingSuccess,
 }: ConsultationBookingModalProps) {
   const [formData, setFormData] = useState<ConsultationData>({
     sehatId: '',
@@ -134,16 +411,8 @@ function ConsultationBookingModal({
       return;
     }
 
-    const websiteUrl = 'https://video-one-livid.vercel.app/';
-    Linking.openURL(websiteUrl)
-      .then(() => {
-        console.log('Opened consultation website successfully');
-        onStartConsultation(formData);
-      })
-      .catch((err) => {
-        console.error('Error opening website:', err);
-        Alert.alert("Error", "Could not open the consultation website");
-      });
+    // Directly call onBookingSuccess without opening website
+    onBookingSuccess(formData);
   };
 
   const formatDate = (date: Date) => {
@@ -167,6 +436,7 @@ function ConsultationBookingModal({
               </TouchableOpacity>
             </View>
 
+            {/* Rest of the form content remains exactly the same */}
             {/* Sehat ID */}
             <View style={modalStyles.inputGroup}>
               <Text style={modalStyles.label}>Sehat ID *</Text>
@@ -347,7 +617,7 @@ function ConsultationBookingModal({
               </TouchableOpacity>
               <TouchableOpacity style={modalStyles.submitBtn} onPress={handleSubmit}>
                 <Ionicons name="videocam" size={18} color={COLORS.white} />
-                <Text style={modalStyles.submitText}>Get Reciept</Text>
+                <Text style={modalStyles.submitText}>Get Receipt</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -358,6 +628,7 @@ function ConsultationBookingModal({
 }
 
 const modalStyles = StyleSheet.create({
+  // ... (keep all the existing modalStyles the same)
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
@@ -562,11 +833,152 @@ const modalStyles = StyleSheet.create({
   },
 });
 
+// Consultation Card Component
+interface ConsultationCardProps {
+  consultation: ConsultationData & { bookingId: string; bookingDate: Date };
+  onDownload: (consultation: ConsultationData & { bookingId: string; bookingDate: Date }) => void;
+}
+
+function ConsultationCard({ consultation, onDownload }: ConsultationCardProps) {
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
+  const getConsultationTypeLabel = (type: string) => {
+    return CONSULTATION_TYPES.find(t => t.id === type)?.label || type;
+  };
+
+  return (
+    <View style={consultationCardStyles.card}>
+      <View style={consultationCardStyles.cardHeader}>
+        <Text style={consultationCardStyles.bookingId}>{consultation.bookingId}</Text>
+        <Text style={consultationCardStyles.date}>{formatDate(consultation.bookingDate)}</Text>
+      </View>
+      
+      <View style={consultationCardStyles.cardBody}>
+        <View style={consultationCardStyles.detailRow}>
+          <Text style={consultationCardStyles.detailLabel}>Type:</Text>
+          <Text style={consultationCardStyles.detailValue}>{getConsultationTypeLabel(consultation.consultationType)}</Text>
+        </View>
+        
+        <View style={consultationCardStyles.detailRow}>
+          <Text style={consultationCardStyles.detailLabel}>Scheduled:</Text>
+          <Text style={consultationCardStyles.detailValue}>
+            {formatDate(consultation.preferredDate)} • {TIME_SLOTS.find(s => s.id === consultation.preferredSlot)?.label.split(': ')[1]}
+          </Text>
+        </View>
+        
+        <View style={consultationCardStyles.detailRow}>
+          <Text style={consultationCardStyles.detailLabel}>Priority:</Text>
+          <Text style={[
+            consultationCardStyles.detailValue,
+          ]}>
+            {consultation.priority.toUpperCase()}
+          </Text>
+        </View>
+      </View>
+      
+      <View style={consultationCardStyles.cardFooter}>
+        <TouchableOpacity 
+          style={consultationCardStyles.downloadButton}
+          onPress={() => onDownload(consultation)}
+        >
+          <Ionicons name="download" size={16} color={COLORS.primary} />
+          <Text style={consultationCardStyles.downloadText}>Download Receipt</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
+const consultationCardStyles = StyleSheet.create({
+  card: {
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  bookingId: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: COLORS.primary,
+  },
+  date: {
+    fontSize: 12,
+    color: COLORS.textLight,
+  },
+  cardBody: {
+    marginBottom: 12,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  detailLabel: {
+    fontSize: 12,
+    color: COLORS.textLight,
+    fontWeight: '500',
+  },
+  detailValue: {
+    fontSize: 12,
+    color: COLORS.text,
+    fontWeight: '500',
+  },
+  priorityLow: {
+    color: '#22C55E',
+  },
+  priorityNormal: {
+    color: '#F59E0B',
+  },
+  priorityHigh: {
+    color: '#EF4444',
+  },
+  cardFooter: {
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+    paddingTop: 12,
+  },
+  downloadButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 8,
+    borderRadius: 6,
+    backgroundColor: COLORS.primaryLight,
+  },
+  downloadText: {
+    fontSize: 12,
+    color: COLORS.primary,
+    fontWeight: '600',
+    marginLeft: 6,
+  },
+});
+
 export default function Dashboard() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [symptomInput, setSymptomInput] = useState('');
   const [showConsultationModal, setShowConsultationModal] = useState(false);
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
+  const [currentReceipt, setCurrentReceipt] = useState<ConsultationData | null>(null);
+  const [bookedConsultations, setBookedConsultations] = useState<(ConsultationData & { bookingId: string; bookingDate: Date })[]>([]);
 
   const handleLogout = () => {
     router.replace('/');
@@ -583,10 +995,26 @@ export default function Dashboard() {
     }
   };
 
-  const handleStartConsultation = (consultationData: ConsultationData) => {
-    console.log("Consultation Data:", consultationData);
-    Alert.alert("Success", "Consultation booked successfully!");
+  const handleBookingSuccess = (consultationData: ConsultationData) => {
+    const newConsultation = {
+      ...consultationData,
+      bookingId: `CN-${Date.now().toString().slice(-6)}`,
+      bookingDate: new Date()
+    };
+    
+    setBookedConsultations(prev => [newConsultation, ...prev]);
+    setCurrentReceipt(consultationData);
     setShowConsultationModal(false);
+    setShowReceiptModal(true);
+  };
+
+  const handleDownloadReceipt = () => {
+    Alert.alert("Success", "Receipt downloaded successfully!");
+    setShowReceiptModal(false);
+  };
+
+  const handleDownloadConsultationReceipt = (consultation: ConsultationData & { bookingId: string; bookingDate: Date }) => {
+    Alert.alert("Download", `Receipt for ${consultation.bookingId} downloaded successfully!`);
   };
 
   const renderBottomNav = () => (
@@ -620,7 +1048,30 @@ export default function Dashboard() {
     </View>
   );
 
-  // ... (rest of the component remains the same, including renderTabContent and other functions)
+  const renderUpcomingConsultations = () => {
+    if (bookedConsultations.length === 0) {
+      return (
+        <View style={styles.emptyState}>
+          <Ionicons name="calendar" size={48} color={COLORS.textLight} />
+          <Text style={styles.emptyStateText}>No upcoming consultations</Text>
+          <Text style={styles.emptyStateSubtext}>Book your first consultation to get started</Text>
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.consultationsSection}>
+        <Text style={styles.sectionTitle}>Upcoming Consultations</Text>
+        {bookedConsultations.map((consultation, index) => (
+          <ConsultationCard
+            key={consultation.bookingId}
+            consultation={consultation}
+            onDownload={handleDownloadConsultationReceipt}
+          />
+        ))}
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -673,6 +1124,9 @@ export default function Dashboard() {
             </View>
           </View>
 
+          {/* Upcoming Consultations */}
+          {renderUpcomingConsultations()}
+
           {/* Health Summary */}
           <View style={styles.healthSection}>
             <Text style={styles.sectionTitle}>Health Summary</Text>
@@ -723,7 +1177,15 @@ export default function Dashboard() {
         <ConsultationBookingModal
           visible={showConsultationModal}
           onClose={() => setShowConsultationModal(false)}
-          onStartConsultation={handleStartConsultation}
+          onBookingSuccess={handleBookingSuccess}
+        />
+
+        {/* Receipt Modal */}
+        <ReceiptModal
+          visible={showReceiptModal}
+          receiptData={currentReceipt}
+          onClose={() => setShowReceiptModal(false)}
+          onDownload={handleDownloadReceipt}
         />
       </View>
     </SafeAreaView>
@@ -818,6 +1280,11 @@ const styles = StyleSheet.create({
   },
   healthSection: {
     paddingHorizontal: 16,
+    marginBottom: 20,
+  },
+  consultationsSection: {
+    paddingHorizontal: 16,
+    marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 18,
@@ -890,6 +1357,25 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: COLORS.primaryDark,
     fontWeight: '600',
+  },
+  emptyState: {
+    alignItems: 'center',
+    padding: 40,
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    marginBottom: 20,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginTop: 12,
+  },
+  emptyStateSubtext: {
+    fontSize: 14,
+    color: COLORS.textLight,
+    textAlign: 'center',
+    marginTop: 4,
   },
   symptomFooter: {
     padding: 16,
