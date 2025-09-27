@@ -15,7 +15,8 @@
       "adaptiveIcon": {
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.deepanshusharma1909.SehatBandhu"
     },
     "web": {
       "bundler": "metro",

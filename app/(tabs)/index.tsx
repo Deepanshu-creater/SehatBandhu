@@ -69,7 +69,7 @@ interface ContentType {
 // Multilingual content with proper typing
 const CONTENT: Record<Language, ContentType> = {
   en: {
-    appName: 'Chiktisa365',
+    appName: 'Chikitsa365',
     welcome: 'Your Health Companion',
     greeting: 'Hi, {greeting} 👋',
     mainContent: 'Connecting doctors with people in Nabha through limited resources using Anganwadi and Community Health Centers. We implement multilingual video calls and translation functionalities even in our AI symptom checker.',
