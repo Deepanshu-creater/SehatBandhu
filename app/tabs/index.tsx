@@ -1526,7 +1526,7 @@ statLabel: {
     backgroundColor: '#27cf4eff',
     borderTopWidth: 1,
     borderTopColor: '#e2e8f0',
-    paddingHorizontal: 8,
+    paddingHorizontal: 18,
     paddingVertical: 12,
     elevation: 8,
     shadowColor: '#000',
