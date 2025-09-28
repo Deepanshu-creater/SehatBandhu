@@ -50,9 +50,9 @@ const THEME = {
 };
 
 const Profile = () => {
-  const [name, setName] = useState('John Doe');
-  const [email, setEmail] = useState('john.doe@example.com');
-  const [phone, setPhone] = useState('+1 123-456-7890');
+  const [name, setName] = useState('Rahul');
+  const [email, setEmail] = useState('rahul.pandat@gmail.com');
+  const [phone, setPhone] = useState('+9109207890');
   const [healthNotes, setHealthNotes] = useState('Allergic to penicillin, Asthmatic');
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [darkModeEnabled, setDarkModeEnabled] = useState(false);
@@ -344,7 +344,7 @@ const Profile = () => {
           </TouchableOpacity>
         </View>
         <Text style={styles.avatarText}>{name}</Text>
-        <Text style={styles.avatarSubText}>Patient ID: MED-123456</Text>
+        <Text style={styles.avatarSubText}>Sehat-ID: MED-123456</Text>
         <View style={styles.healthScore}>
           <Ionicons name="shield-checkmark" size={14} color={THEME.status.success} />
           <Text style={styles.healthScoreText}>Health Score: 92/100</Text>
