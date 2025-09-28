@@ -344,7 +344,7 @@ const Profile = () => {
           </TouchableOpacity>
         </View>
         <Text style={styles.avatarText}>{name}</Text>
-        <Text style={styles.avatarSubText}>Patient ID: MED-123456</Text>
+        <Text style={styles.avatarSubText}>Sehat-ID: RA32123456</Text>
         <View style={styles.healthScore}>
           <Ionicons name="shield-checkmark" size={14} color={THEME.status.success} />
           <Text style={styles.healthScoreText}>Health Score: 92/100</Text>
