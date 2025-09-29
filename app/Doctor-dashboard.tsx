@@ -1,15 +1,16 @@
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
-    Alert,
-    Dimensions,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Alert,
+  Dimensions,
+  Linking,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
@@ -105,6 +106,24 @@ export default function DoctorDashboard() {
   const [newMedication, setNewMedication] = useState<Medication>({ name: '', dosage: '', frequency: '' });
   const [instructions, setInstructions] = useState<string>('');
 
+  const openVideoConsultation = async () => {
+    const videoUrl = 'https://video-one-livid.vercel.app/';
+    
+    try {
+      // Check if the link can be opened
+      const supported = await Linking.canOpenURL(videoUrl);
+      
+      if (supported) {
+        await Linking.openURL(videoUrl);
+      } else {
+        Alert.alert('Error', `Cannot open the video consultation link: ${videoUrl}`);
+      }
+    } catch (error) {
+      console.error('Error opening video consultation:', error);
+      Alert.alert('Error', 'Failed to open video consultation');
+    }
+  };
+
   const handleStartConsultation = () => {
     if (!medicalId.trim() || !roomNo.trim()) {
       Alert.alert('Error', 'Please enter your Medical ID and Room Number');
@@ -116,6 +135,9 @@ export default function DoctorDashboard() {
       return;
     }
 
+    // Open the video consultation link
+    openVideoConsultation();
+    
     setIsConsultationActive(true);
     // Update patient status to in-consultation
     setPatients(prev => 
@@ -123,7 +145,7 @@ export default function DoctorDashboard() {
         p.id === activePatient.id ? { ...p, status: 'in-consultation' } : p
       )
     );
-    Alert.alert('Success', 'Consultation started successfully!');
+    Alert.alert('Success', 'Consultation started successfully! Video consultation opened.');
   };
 
   const handleEndConsultation = () => {
@@ -303,9 +325,11 @@ export default function DoctorDashboard() {
               <TouchableOpacity 
                 style={[
                   styles.consultButton,
-                  isConsultationActive ? styles.endButton : styles.startButton
+                  isConsultationActive ? styles.endButton : styles.startButton,
+                  (!medicalId.trim() || !roomNo.trim() || !activePatient) && styles.disabledButton
                 ]}
                 onPress={isConsultationActive ? handleEndConsultation : handleStartConsultation}
+                disabled={!isConsultationActive && (!medicalId.trim() || !roomNo.trim() || !activePatient)}
               >
                 <Ionicons 
                   name={isConsultationActive ? "videocam-off" : "videocam"} 
@@ -324,6 +348,12 @@ export default function DoctorDashboard() {
                   <Text style={styles.patientVideoText}>
                     with {activePatient?.name}
                   </Text>
+                  <TouchableOpacity 
+                    style={styles.openVideoButton}
+                    onPress={openVideoConsultation}
+                  >
+                    <Text style={styles.openVideoButtonText}>Open Video Consultation</Text>
+                  </TouchableOpacity>
                 </View>
               )}
             </View>
@@ -482,6 +512,10 @@ const styles = StyleSheet.create({
   endButton: {
     backgroundColor: COLORS.danger,
   },
+  disabledButton: {
+    backgroundColor: COLORS.textLight,
+    opacity: 0.6,
+  },
   consultButtonText: {
     color: COLORS.white,
     fontWeight: 'bold',
@@ -507,6 +541,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.text,
     marginTop: 4,
+  },
+  openVideoButton: {
+    backgroundColor: COLORS.primary,
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 12,
+  },
+  openVideoButtonText: {
+    color: COLORS.white,
+    fontWeight: 'bold',
   },
   patientCard: {
     flexDirection: 'row',
